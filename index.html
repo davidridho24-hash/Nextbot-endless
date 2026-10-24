@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nextbot: Endless</title>
+<style>
+:root{--bg:#f4f5f7;--fg:#14161c;--ac:#d6261b;--pn:rgba(255,255,255,.88);--am:#c77700;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"Trebuchet MS",Verdana,sans-serif;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+canvas{touch-action:none;position:fixed;inset:0;width:100%;height:100%;display:block}
+.hud{flex-wrap:wrap;position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;justify-content:space-between;gap:8px;pointer-events:none;font-size:14px}
+.hud div{border:1px solid rgba(0,0,0,.18);background:var(--pn);padding:6px 10px;border-radius:8px}
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(60vw,260px);height:8px;background:var(--pn);border-radius:4px;overflow:hidden}
+#bar i{display:block;height:100%;width:100%;background:var(--am)}
+#arrow{display:inline-block;color:var(--ac);transition:none}
+.btn{position:fixed;right:14px;width:68px;height:68px;border-radius:50%;border:2px solid rgba(0,0,0,.4);background:var(--pn);color:var(--fg);font:700 12px "Trebuchet MS",sans-serif;display:flex;align-items:center;justify-content:center}
+#bj{bottom:calc(env(safe-area-inset-bottom,0px) + 110px)}#bs{bottom:calc(env(safe-area-inset-bottom,0px) + 34px);right:92px}#bc{bottom:calc(env(safe-area-inset-bottom,0px) + 34px)}
+#js{position:fixed;width:110px;height:110px;margin:-55px 0 0 -55px;border:2px solid rgba(0,0,0,.3);border-radius:50%;display:none}
+#js i{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.25)}
+.ov{position:fixed;inset:0;overflow-y:auto;z-index:5;background:rgba(244,245,247,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px}
+.ov>:first-child{margin-top:auto}.ov>:last-child{margin-bottom:auto}.ov h1{font:700 34px Georgia,serif;margin:0;letter-spacing:.5px}.ov p{margin:0;max-width:34ch;opacity:.9;line-height:1.45}
+.ov button{font:700 16px "Trebuchet MS",sans-serif;padding:12px 28px;border-radius:10px;border:0;background:var(--ac);color:#fff;min-width:210px}
+.ov button.g{background:#dde1e8;color:#14161c}
+#toast{font-size:13px;color:#8a5200;min-height:18px}
+#vg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(120,0,0,.85) 100%);opacity:.2}
+#nz{position:fixed;inset:0;pointer-events:none;opacity:.06;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.cfg{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-size:12px}.cfg input{width:90px}
+.btn.on{background:var(--ac);color:#fff}
+.glitch{animation:gl .12s steps(2) infinite;filter:drop-shadow(6px 0 0 rgba(255,0,0,.9)) drop-shadow(-6px 0 0 rgba(0,255,255,.9)) contrast(1.4) saturate(1.6)}
+@keyframes gl{0%{transform:scale(1.05) translate(0,0) skewX(0)}25%{transform:scale(1.05) translate(-9px,3px) skewX(2deg)}50%{transform:scale(1.06) translate(8px,-4px) skewX(-3deg);filter:hue-rotate(50deg) drop-shadow(9px 0 0 red) drop-shadow(-9px 0 0 cyan)}75%{transform:scale(1.05) translate(-4px,-7px) skewX(1deg)}100%{transform:scale(1.05) translate(6px,5px)}}
+#over{background:rgba(24,0,0,.94);color:#fff}#over h1{color:#ff3b30;font-size:48px;letter-spacing:5px;text-shadow:3px 0 cyan,-3px 0 red}#over p{font-size:18px;opacity:1}#over button.g{background:#3b1414;color:#fff}
+.stat{animation:st .09s steps(2) infinite;filter:grayscale(1) contrast(1.9) brightness(1.1)}
+@keyframes st{0%{transform:scale(1.04)}50%{transform:scale(1.04) translate(-6px,4px)}100%{transform:scale(1.05) translate(5px,-3px)}}
+.inv{animation:iv .1s steps(2) infinite;filter:invert(1) contrast(1.3) hue-rotate(20deg)}
+@keyframes iv{0%{transform:scale(1.03)}50%{transform:scale(1.04) translate(5px,-4px)}100%{transform:scale(1.03) translate(-4px,3px)}}
+#nz.on{animation:nzm .08s steps(3) infinite}@keyframes nzm{0%{background-position:0 0}33%{background-position:-40px 25px}66%{background-position:30px -50px}100%{background-position:-20px 40px}}
+.cu{max-width:360px;font-size:12px}.cu summary{font-size:15px;padding:10px;cursor:pointer;margin-bottom:6px}.cr{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0}
+.cr label{position:relative;overflow:hidden;display:flex;align-items:center;box-sizing:border-box;min-height:44px;background:#dde1e8;color:#14161c;padding:10px 14px;border-radius:10px;font-size:14px}.cr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:0;cursor:pointer}
+#xh{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.6);pointer-events:none}
+#ammo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 30px);background:var(--pn);padding:4px 10px;border-radius:8px;font-size:13px;pointer-events:none;border:1px solid rgba(0,0,0,.18)}
+#bf{bottom:calc(env(safe-area-inset-bottom,0px) + 186px);background:rgba(214,38,27,.92);color:#fff}
+#card{background:rgba(12,10,6,.95);color:#f0e6b8}#card h1{font-size:30px;letter-spacing:1px}#card p{max-width:38ch;line-height:1.55;font-size:16px;opacity:1}
+#xh.hit{background:#ff3b30;transform:scale(1.8)}
+#br{bottom:calc(env(safe-area-inset-bottom,0px) + 110px);right:92px;width:56px;height:56px;background:rgba(40,60,120,.9);color:#fff}
+.mono{filter:grayscale(1) contrast(1.35)}
+#mx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5;mix-blend-mode:screen}
+#crash{background:#000;color:#ff3b30;font-family:monospace}#crash h1{font-size:34px;letter-spacing:3px}#crash pre{text-align:left;font-size:13px;line-height:1.6;color:#ff8a80;min-height:110px}
+.hide{display:none!important}
+</style></head><body>
+<canvas id="c"></canvas><div id="vg"></div><div id="nz"></div><canvas id="mx" class="hide"></canvas>
+<div class="hud hide" id="hud"><div>Survived <b id="tm">00:00</b></div><div>Nextbots <b id="nb">0</b> · <b id="nd">--</b> <span id="arrow">▲</span></div><div id="md">Story</div><div id="exb" class="hide"><span id="exa" style="display:inline-block;color:var(--ac)">▲</span> <span id="exl">EXIT</span> <b id="exd">--</b></div></div>
+<div id="bar" class="hide"><i id="st"></i></div>
+<div id="js"><i></i></div>
+<div class="btn hide" id="bj">JUMP</div><div class="btn hide" id="bs">SPRINT</div><div class="btn hide" id="bc">SLIDE</div><div class="btn hide" id="bf">FIRE</div><div class="btn hide" id="br">R</div><div id="xh" class="hide"></div><div id="ammo" class="hide">AMMO 10 / 10</div>
+<div class="ov" id="menu"><h1>Nextbot: Endless</h1><p>It never stops and it never tires. Run, slide under the amber overhangs, and don't get cornered.</p>
+<button id="solo">Story: The Backrooms</button><button class="g" id="endless">Endless</button><button class="g" id="mp">Multiplayer</button><div id="toast"></div>
+<details class="cu"><summary>Custom bot: foto &amp; audio dari HP</summary><div class="cr"><b>Bot 1</b><label>Pilih foto<input class="cf" data-i="0" data-k="img" type="file" accept="image/*"></label><label>Pilih audio kejar<input class="cf" data-i="0" data-k="chase" type="file" accept="audio/*"></label><label>Pilih audio jumpscare<input class="cf" data-i="0" data-k="scare" type="file" accept="audio/*"></label></div><div class="cr"><b>Bot 2</b><label>Pilih foto<input class="cf" data-i="1" data-k="img" type="file" accept="image/*"></label><label>Pilih audio kejar<input class="cf" data-i="1" data-k="chase" type="file" accept="audio/*"></label><label>Pilih audio jumpscare<input class="cf" data-i="1" data-k="scare" type="file" accept="audio/*"></label></div><div class="cr"><b>Bot 3</b><label>Pilih foto<input class="cf" data-i="2" data-k="img" type="file" accept="image/*"></label><label>Pilih audio kejar<input class="cf" data-i="2" data-k="chase" type="file" accept="audio/*"></label><label>Pilih audio jumpscare<input class="cf" data-i="2" data-k="scare" type="file" accept="audio/*"></label></div><small>File hanya ada di HP-mu dan hilang kalau halaman dimuat ulang. Pakai foto orang yang setuju saja.</small></details><div class="cfg"><label>Fog <input type="range" id="sf" min=".5" max="2" step=".1" value="1"></label><label>Sensitivity <input type="range" id="sn" min=".2" max="3" step=".1" value="1"></label><label>Light <input type="range" id="sb" min=".5" max="2" step=".1" value="1"></label></div><p style="font-size:12px">Move: left thumb or WASD · Look: right side or mouse · Shift/SPRINT toggles run · C slide · hold Space/JUMP to bunny-hop · hold click/FIRE to shoot</p></div>
+<div class="ov hide" id="card"><h1 id="ch"></h1><p id="cp"></p><button id="cb">Masuk</button><button class="g" id="cm">Kembali ke menu</button></div><div class="ov hide" id="crash"><h1>FATAL ERROR</h1><pre id="cr"></pre></div><div class="ov hide" id="over"><h1>YOU DIED</h1><p id="res"></p><button id="retry">Respawn</button><button class="g" id="tomenu">Return to Menu</button><div class="cfg"><label>Sensitivity <input type="range" id="sn2" min=".2" max="3" step=".1" value="1"></label></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const G=8,CS=5,CH=40,R=22,W=45,D=[[1,0],[-1,0],[0,1],[0,-1]],par=new Int32Array(W*W);
+let seed=1;
+const THS=[
+{id:'0',name:'Level 0 — The Lobby',story:'Kamu jatuh keluar dari kenyataan dan terbangun di ruangan kuning tanpa ujung: wallpaper lembap, karpet basah, dengung lampu neon yang tidak pernah berhenti. Cari dinding atau lantai yang bergetar glitch. Di sanalah kamu bisa no-clip keluar.',w:[.5,0,3,1.5,2.5,.5,0,0,0],wall:[.14,.55,.6],style:'paper',floor:'carpet',rough:1,ceilH:3.7,ceilCol:0xcdbd6a,sky:0,fog:0x2a2410,fogFar:70,calm:0xe8d890,bright:1.1,lamp:0xfff1a8,props:'none',amb:'hum',exit:'glitch'},
+{id:'1',name:'Level 1 — Habitable Zone',story:'Gudang beton bawah tanah yang luas, tumpukan kotak persediaan, lampu redup yang jauh. Di suatu tempat ada lift atau pintu darurat. Temukan untuk turun lebih dalam.',w:[.5,0,1.5,1,.5,4,0,0,0],wall:[.58,.06,.52],style:'concrete',floor:'concrete',rough:.9,ceilH:6.9,ceilCol:0x3a3d42,sky:0,fog:0x14161a,fogFar:85,calm:0xaab4c8,bright:1,lamp:0xdbe8ff,props:'crates',amb:'machine',exit:'elevator'},
+{id:'35',name:'Level 35 — An Empty Car Park',story:'Parkiran bawah tanah bertingkat yang sangat luas. Pilar beton raksasa, mobil-mobil terbengkalai, tetesan air di kejauhan. Ikuti tanda EXIT merah.',w:[1,0,.5,0,0,0,0,0,5],wall:[.58,.04,.5],style:'concrete',floor:'concrete',rough:.9,ceilH:7,ceilCol:0x2b2d31,sky:0,fog:0x0e0f12,fogFar:75,calm:0x9fa6b0,bright:.85,lamp:0xdfe8ff,props:'none',cars:.35,amb:'carpark',exit:'sign'},
+{id:'37',name:'Level 37 — The Poolrooms',story:'Kompleks ubin keramik putih bersih, terendam air suam-suam kuku. Cahaya air memantul di langit-langit dan gema menetes di mana-mana. Di lorong ubin gelap yang tersembunyi ada tangga rahasia ke bawah.',w:[.5,0,3,1.5,2,0,0,0,0],wall:[.5,.05,.93],style:'tile',floor:'tile',rough:.25,ceilH:4.6,ceilCol:0xe8f4f6,ceilMap:true,water:true,dark:.3,sky:0,fog:0xcfe8ee,fogFar:80,calm:0xf4ffff,bright:1.15,lamp:0xe8ffff,props:'none',amb:'pool',exit:'stairs'},
+{id:'Fun',name:'Level Fun =) — The Partyroom',story:'Balon di mana-mana, coretan krayon di dinding, tawa yang terlalu keras. Hindari para Partygoers, lalu pecahkan terminal komputer. Tahan dirimu di dekatnya sampai selesai.',w:[1.5,0,2,1,3,0,0,0,0],wall:[.9,.5,.74],hv:1,style:'party',floor:'party',rough:.6,ceilH:4,ceilCol:0xf2d6e0,sky:0,fog:0x2a1830,fogFar:60,calm:0xf0b8e8,bright:.95,lamp:0xffd0f0,props:'furn',balloons:true,amb:'party',exit:'terminal'},
+{id:'905',name:'Level 905 — The Zenith',story:'Langit terbuka dan tangga raksasa yang melingkar tanpa ujung. Naiklah ke puncak menara. Tidak ada akhir di sini, hanya level berikutnya.',w:[2,0,0,0,0,0,1.5,3,0],wall:[.1,.1,.82],style:'stone',floor:'marble',rough:.35,ceilH:0,sky:2,fog:0xcfe3ff,fogFar:140,calm:0xffffff,bright:1.15,sun:.9,sunCol:0xfff0d0,lamps:false,props:'none',amb:'zenith',exit:'zenith'}];
+const CITY={id:'City',name:'The Endless City',w:[1,1.5,1.5,1,1.5,1,1.5,0,0],wall:[.08,.25,.62],hv:.12,style:'facade',floor:'grass',ceilH:0,sky:1,fog:0x0b1530,fogFar:95,calm:0x6f86c8,bright:1,lamp:null,props:'furn',gable:true,cars:.05,amb:'city'};
+const ERR={id:'NULL',name:'ERROR LEVEL — NULL',w:[1,1,1,1,1,1,1,1,1],wall:[.38,.9,.5],style:'matrix',floor:'grid',rough:.5,ceilH:0,sky:0,fog:0x001a08,fogFar:60,calm:0x66ff88,bright:1.1,lamps:false,props:'none',amb:'error',mono:true,grav:4,aggr:1.7};
+[...THS,CITY,ERR].forEach(t=>t.ws=t.w.reduce((a,b)=>a+b,0));let TH=CITY;
+function hash(x,y,z){let h=(Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(z,1274126177)+seed)|0;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
+// cell value: 0 free, >0 building height, -1 low overhang (slide under)
+const CC=new Map(),OPN=[[0,3],[0,4],[7,3],[7,4],[3,0],[4,0],[3,7],[4,7]],STEP=.6;
+function flood(A,st){const Rr=new Uint8Array(G*G),q=[];st.forEach(c=>{if(A[c]===0&&!Rr[c]){Rr[c]=1;q.push(c)}});
+ for(let i=0;i<q.length;i++){const c=q[i],x=c%G,z=(c/G)|0;for(const[dx,dz]of D){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=G||nz>=G)continue;const n=nz*G+nx;if(!Rr[n]&&A[n]===0){Rr[n]=1;q.push(n)}}}return Rr}
+function ctype(cx,cz){const r=hash(cx,cz,1)*TH.ws;let a=0;for(let i=0;i<TH.w.length;i++){a+=TH.w[i];if(r<a)return i}return 0}
+// buildings keep a free street ring around them (so every exit stays connected). A.R ramps, A.T walkable tops, A.I interior, A.F doors
+function building(A,cx,cz,t){const rn=k=>hash(cx,cz,100+k),set=(x,z,v)=>{A[z*G+x]=v};
+ const ring=(x0,z0,w,h,wh)=>{for(let x=x0;x<x0+w;x++)for(let z=z0;z<z0+h;z++){const e=x==x0||x==x0+w-1||z==z0||z==z0+h-1;set(x,z,e?wh:0);if(!e)A.I[z*G+x]=1}};
+ const door=(x,z)=>{set(x,z,0);A.F[z*G+x]=1;A.I[z*G+x]=0};
+ if(t==4){const w=5,h=4,x0=1+Math.floor(rn(1)*2),z0=1+Math.floor(rn(2)*3),wh=3.4,s0=Math.floor(rn(3)*4);ring(x0,z0,w,h,wh);A.B={x0,z0,w,h,wh};
+  const dx=(k)=>x0+1+Math.floor(rn(k)*(w-2)),dz=(k)=>z0+1+Math.floor(rn(k)*(h-2));
+  if(s0==0)door(dx(4),z0);else if(s0==1)door(dx(4),z0+h-1);else if(s0==2)door(x0,dz(4));else door(x0+w-1,dz(4));
+  if(rn(5)<.5){if(s0==0)door(dx(6),z0+h-1);else if(s0==1)door(dx(6),z0);else if(s0==2)door(x0+w-1,dz(6));else door(x0,dz(6))}}
+ else if(t==5){const w=6,h=4,x0=1,z0=1+Math.floor(rn(1)*3),wh=6.4,bot=rn(2)<.5;ring(x0,z0,w,h,wh);A.B={x0,z0,w,h,wh};
+  const gz=bot?z0:z0+h-1,mz=bot?z0+h-2:z0+1;door(x0+2,gz);door(x0+3,gz);
+  for(const x of[x0+3,x0+4]){set(x,mz,2.4);A.T[mz*G+x]=1;A.I[mz*G+x]=0}
+  set(x0+2,mz,0);A.R[mz*G+x0+2]={d:0,b:0,r:2.4};A.I[mz*G+x0+2]=0}
+ else if(t==6){const x0=3+Math.floor(rn(1)*2),z0=2+Math.floor(rn(2)*3),rh=4.6,zc=z0+1,xc=x0+1;
+  for(let x=x0;x<x0+3;x++)for(let z=z0;z<z0+3;z++){set(x,z,rh);A.T[z*G+x]=1}
+  set(x0-2,zc,0);A.R[zc*G+x0-2]={d:0,b:0,r:2.3};set(x0-1,zc,0);A.R[zc*G+x0-1]={d:0,b:2.3,r:2.3};
+  if(z0>=3&&rn(3)<.6){set(xc,z0-2,0);A.R[(z0-2)*G+xc]={d:2,b:0,r:2.3};set(xc,z0-1,0);A.R[(z0-1)*G+xc]={d:2,b:2.3,r:2.3}}}
+ else if(t==7){const ramp=(x,z,d,b)=>{set(x,z,0);A.R[z*G+x]={d,b,r:2.3}},land=(x,z,h)=>{set(x,z,h);A.T[z*G+x]=1};
+  for(let x=2;x<=5;x++)for(let z=2;z<=5;z++)set(x,z,36);
+  for(let k=0;k<4;k++)ramp(2+k,1,0,2.3*k);land(6,1,9.2);for(let k=0;k<4;k++)ramp(6,2+k,2,9.2+2.3*k);land(6,6,18.4);
+  for(let k=0;k<4;k++)ramp(5-k,6,1,18.4+2.3*k);land(1,6,27.6);for(let k=0;k<3;k++)ramp(1,5-k,3,27.6+2.3*k);land(1,2,34.5);A.EXT={x:1,z:2,h:34.5}}
+ else if(t==8){for(let x=1;x<=6;x++)for(let z=1;z<=6;z++)if(x%2==1&&z%2==1)set(x,z,3.4);
+  if(rn(1)<.55){const zd=1+Math.floor(rn(2)*3),zc=zd+1;for(let x=4;x<=6;x++)for(let z=zd;z<zd+3;z++){set(x,z,3.2);A.T[z*G+x]=1}
+   set(1,zc,0);set(2,zc,0);A.R[zc*G+2]={d:0,b:0,r:1.6};set(3,zc,0);A.R[zc*G+3]={d:0,b:1.6,r:1.6}}}
+}
+// Solid props (furniture, crates, cars). They always sit against a wall inside their own cell,
+// so the middle lane of every cell stays free for the player and for bot pathfinding.
+function genProps(A,cx,cz){const PR=[],PB=[];A.PR=PR;A.PB=PB;
+ const vb=(x,y,z,sx,sy,sz,c)=>({x,y,z,sx,sy,sz,c}),item=(i,x,z,hx,hz,top,vis)=>{const p={x,z,hx,hz,top,vis};PR.push(p);(PB[i]||(PB[i]=[])).push(p)};
+ const place=(i,px,pz,d,kind,q)=>{const dx=D[d][0],dz=D[d][1],ax=dx!=0,dist=kind==5?1.5:1.8,wx=px+dx*dist,wz=pz+dz*dist,
+   V=(lg,sh,y,h,c,off)=>vb(wx+(ax?0:off||0),y+h/2,wz+(ax?off||0:0),ax?sh:lg,h,ax?lg:sh,c),
+   C=(lg,sh,h,off,vis)=>item(i,wx+(ax?0:off||0),wz+(ax?off||0:0),(ax?sh:lg)/2,(ax?lg:sh)/2,h,vis);
+  if(kind==0)C(1.6,.9,.8,0,[V(1.6,.9,.72,.08,0x6b4a2f),V(1.2,.6,0,.72,0x4a3320)]);
+  else if(kind==1)C(1.4,.7,.79,0,[V(1.4,.7,0,.75,0x59657a),V(.5,.4,.75,.04,0x222222,.3)]);
+  else if(kind==2){for(const o of[-.8,.8])C(.5,.5,.9,o,[V(.5,.5,.42,.06,0x2d3a52,o),V(.1,.1,0,.42,0x222222,o)])}
+  else if(kind==3)C(1.3,.4,1.9,0,[V(1.3,.4,0,1.8,0x3b2a1c)]);
+  else if(kind==4){const n=1+Math.floor(q*3),vis=[],off=(q-.5)*2;for(let k=0;k<n;k++)vis.push(V(1.2,1.2,k*1.2,1.2,k%2?0x6f5530:0x8a6a3a,off));C(1.2,1.2,n*1.2,off,vis)}
+  else{const c=[0x6e2b2b,0x2b4a6e,0x555a5f,0x3b5a3a,0x8a7a3a][Math.floor(q*50)%5];C(4.2,1.9,1.5,0,[V(4.2,1.9,.3,.75,c),V(2.2,1.6,1.05,.6,0x1d2026,-.2)])}};
+ for(let z=1;z<=6;z++)for(let x=1;x<=6;x++){const i=z*G+x;if(A[i]!==0||A.R[i]||A.F[i])continue;
+  const gx=cx*G+x,gz=cz*G+z,px=(gx+.5)*CS,pz=(gz+.5)*CS,ws=[];for(let d=0;d<4;d++){const n=(z+D[d][1])*G+x+D[d][0];if(A[n]>0&&!A.T[n])ws.push(d)}
+  if(A.I[i]){if(TH.props=='furn'){for(const d of ws){const q=hash(gx,gz,24+d);if(q<.5)place(i,px,pz,d,Math.floor(q*8)%4,q)}}
+   else if(TH.props=='crates'&&ws.length&&hash(gx,gz,61)<.5)place(i,px,pz,ws[0],4,hash(gx,gz,62));continue}
+  if(TH.props=='crates'&&ws.length&&hash(gx,gz,82)<.1){place(i,px,pz,ws[0],4,hash(gx,gz,83));continue}
+  if(TH.cars&&hash(gx,gz,80)<TH.cars){const q=hash(gx,gz,81),flip=hash(gx,gz,84)<.5;
+   if(A.t==8){if(ws.includes(2)&&ws.includes(3))place(i,px,pz,flip?2:3,5,q);else if(ws.includes(0)&&ws.includes(1))place(i,px,pz,flip?0:1,5,q)}   // parked along an aisle, beside the pillars
+   else if(ws.length)place(i,px,pz,ws[0],5,q)}}}
+function layout(cx,cz){const key=(cx+32768)*65536+(cz+32768);let A=CC.get(key);if(A)return A;if(CC.size>500)CC.clear();
+ A=new Array(G*G).fill(0);A.R=[];A.T=[];A.I=[];A.F=[];const t=ctype(cx,cz);A.t=t;
+ if(t<4){for(let z=0;z<G;z++)for(let x=0;x<G;x++){const gx=cx*G+x,gz=cz*G+z,r=hash(gx,gz,2);let v;
+  if(t==0)v=r<.08?3:0;else if(t==1)v=(x%3&&z%3)?15+hash(gx,gz,3)*25:0;else if(t==2)v=((x%2&&z%2)||r<.35)?4:(r>.93?-1:0);else v=x%3?((z==G-2&&r<.7)?0:8):((z==1||z==G-2)?6:0);A[z*G+x]=v}}
+ else building(A,cx,cz,t);
+ const ops=OPN.map(([x,z])=>z*G+x);ops.forEach(o=>A[o]=0);let Rr=flood(A,[ops[0]]);
+ for(const o of ops){if(Rr[o])continue;const par=new Int16Array(G*G).fill(-2),q=[];for(let i=0;i<G*G;i++)if(Rr[i]){par[i]=-1;q.push(i)}
+  for(let i=0;i<q.length&&par[o]===-2;i++){const c=q[i],x=c%G,z=(c/G)|0;for(const[dx,dz]of D){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=G||nz>=G)continue;const n=nz*G+nx;if(par[n]===-2){par[n]=c;q.push(n)}}}
+  for(let c=o;par[c]!==-1;c=par[c])A[c]=0;Rr=flood(A,[ops[0]])}
+ for(let i=0;i<G*G;i++)if(A[i]===0&&!Rr[i])A[i]=t==1?20:t==3?8:4;
+ A.IL=[];for(let i=0;i<G*G;i++)if(A.I[i]&&A[i]===0&&!A.R[i]&&!A.F[i])A.IL.push(i);
+ genProps(A,cx,cz);CC.set(key,A);return A}
+function cellL(gx,gz){const cx=Math.floor(gx/G),cz=Math.floor(gz/G);return[layout(cx,cz),(gz-cz*G)*G+(gx-cx*G)]}
+function cell(gx,gz){const cx=Math.floor(gx/G),cz=Math.floo
