@@ -1,0 +1,4 @@
+Nextbot: Endless
+Copyright (c) 2026 davidridho. All rights reserved.
+Usage is governed by the license you purchased on Codester (Regular or Extended).
+Three.js is included by reference under the MIT license.
